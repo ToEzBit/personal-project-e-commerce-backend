@@ -22,6 +22,9 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      lastUpdatePassword: {
+        type: Sequelize.DATE,
+      },
       firstName: {
         type: Sequelize.STRING,
       },

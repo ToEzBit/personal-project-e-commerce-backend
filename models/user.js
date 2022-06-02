@@ -70,6 +70,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      lastUpdatePassword: {
+        type: DataTypes.DATE,
+      },
       firstName: {
         type: DataTypes.STRING,
       },
