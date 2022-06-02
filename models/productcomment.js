@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: DataTypes.INTEGER,
       productId: DataTypes.INTEGER,
       title: DataTypes.STRING,
-      rate: DataTypes.ENUM,
+      rate: DataTypes.ENUM(["1", "2", "3", "4", "5"]),
     },
     {
       sequelize,

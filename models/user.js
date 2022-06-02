@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "RESTRICT",
       });
 
-      User.hasMany(models.creditCard, {
+      User.hasMany(models.CreditCard, {
         foreignKey: {
           name: "userId",
           allowNull: false,
