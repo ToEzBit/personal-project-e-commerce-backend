@@ -40,3 +40,27 @@ exports.signup = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      creatError("User not found", 404);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      creatError("Password is incorrect", 401);
+    }
+
+    const token = genToken({ id: user.id });
+
+    res.json({ token: token });
+  } catch (err) {
+    next(err);
+  }
+};
