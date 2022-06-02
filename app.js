@@ -1,0 +1,18 @@
+require("dotenv").config();
+const express = require("express");
+const morgan = require("morgan");
+const errorMiddleware = require("./middlewares/error");
+const notfoundMiddleware = require("./middlewares/notfound");
+const app = express();
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+app.use(express.json);
+app.use(express.urlencoded({ extended: true }));
+app.use(errorMiddleware);
+app.use(notfoundMiddleware);
+
+app.listen(process.env.PORT, () =>
+  console.log(`Sever is running on port ${process.env.PORT}`)
+);
