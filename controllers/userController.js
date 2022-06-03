@@ -117,3 +117,26 @@ exports.uploadProfileImage = async (req, res, next) => {
     }
   }
 };
+
+exports.deleteAddress = async (req, res, next) => {
+  try {
+    const {
+      user: { id },
+    } = req;
+    const { addressId } = req.body;
+    const address = await Address.findOne({ where: { id: addressId } });
+
+    if (!address) {
+      creatError("Address not found", 404);
+    }
+
+    if (id !== address.userId) {
+      creatError("You dont have permission", 401);
+    }
+
+    await address.destroy();
+    res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};

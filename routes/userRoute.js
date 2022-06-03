@@ -9,4 +9,6 @@ router.post(
   upload.single("profileImage"),
   userController.uploadProfileImage
 );
+router.delete("/address", userController.deleteAddress);
+
 module.exports = router;
