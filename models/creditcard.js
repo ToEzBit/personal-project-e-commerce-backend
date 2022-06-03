@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   CreditCard.init(
     {
-      CreditCard: DataTypes.STRING,
+      creditCard: DataTypes.STRING,
     },
     {
       sequelize,
