@@ -1,7 +1,10 @@
 const bcrypt = require("bcryptjs");
+const fs = require("fs");
 const { User, Address, PhoneNumber, CreditCard } = require("../models");
 const creatError = require("../utils/creatError");
 const validateUpdateProfile = require("../utils/validateUpdateProfile");
+const cropImage = require("../utils/cropImage");
+const cloundinary = require("../utils/cloudinary");
 
 exports.updateProfile = async (req, res, next) => {
   try {
@@ -86,10 +89,31 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.uploadProfileImage = async (req, res, next) => {
   try {
-    // const { profileImage } = req.files;
-    // console.log(req.files);
-    // console.log(profileImage);
+    const {
+      user: { id },
+    } = req;
+
+    if (!req.file) {
+      creatError("No file uploaded", 400);
+    }
+
+    const uploadedImage = await cloundinary.upload(req.file.path, {
+      folder: "codecamp-e-commerce/userImage",
+    });
+
+    // const croppedImage = cropImage(uploadedImage.secure_url, 800, 800);
+
+    const user = await User.findOne({ where: { id } });
+    await cloundinary.destroy(user.profileImagePublicId);
+    user.profileImage = uploadedImage.secure_url;
+    user.profileImagePublicId = uploadedImage.public_id;
+    await user.save();
+    res.json({ newImage: uploadedImage.secure_url });
   } catch (err) {
     next(err);
+  } finally {
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
   }
 };

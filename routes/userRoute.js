@@ -6,7 +6,7 @@ const upload = require("../middlewares/upload");
 router.patch("/updateProfile", userController.updateProfile);
 router.post(
   "/uploadProfileImage",
-  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  upload.single("profileImage"),
   userController.uploadProfileImage
 );
 module.exports = router;
