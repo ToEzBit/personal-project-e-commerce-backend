@@ -1,6 +1,6 @@
 const fs = require("fs");
 const creatError = require("../utils/creatError");
-const { Product, ProductImage } = require("../models");
+const { Product, ProductImage, ProductComment } = require("../models");
 const cloundinary = require("../utils/cloudinary");
 exports.createProduct = async (req, res, next) => {
   try {
@@ -35,7 +35,7 @@ exports.createProduct = async (req, res, next) => {
       creatError("Product already exists", 400);
     }
 
-    // const productName = "test part product";
+    // const productName = "gundam wing";
     // const stock = 10;
     // const price = 100;
     // const role = "standard";
@@ -239,6 +239,41 @@ exports.deleteImage = async (req, res, next) => {
     await cloundinary.destroy(image.publicId);
     await image.destroy();
     res.status(204).json({});
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getProducts = async (req, res, next) => {
+  try {
+    // const { page, limit } = req.query;
+    // const offset = limit * (page - 1);
+    // const products = await Product.findAll({
+    //   offset,
+    //   limit,
+    //   order: [["id", "DESC"]],
+    // });
+    // res.json({ products });
+    const products = await Product.findAll({
+      attributes: {
+        exclude: [
+          "stock",
+          "mainDescription",
+          "subDescription1",
+          "subDescription1",
+          "subDescription1",
+          "createdAt",
+        ],
+      },
+      include: [
+        {
+          model: ProductImage,
+          where: { role: "thumbnail" },
+          attributes: ["image"],
+        },
+      ],
+    });
+    res.json({ products });
   } catch (err) {
     next(err);
   }
