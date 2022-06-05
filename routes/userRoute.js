@@ -10,5 +10,6 @@ router.post(
   userController.uploadProfileImage
 );
 router.delete("/address", userController.deleteAddress);
+router.delete("/creditCard", userController.deleteCreditCard);
 
 module.exports = router;

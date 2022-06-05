@@ -140,3 +140,27 @@ exports.deleteAddress = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteCreditCard = async (req, res, next) => {
+  try {
+    const {
+      user: { id },
+    } = req;
+    const { creditCardId } = req.body;
+    const creditCard = await CreditCard.findOne({
+      where: { id: creditCardId },
+    });
+
+    if (!creditCard) {
+      creatError("Credit card not found", 404);
+    }
+
+    if (id !== creditCard.userId) {
+      creatError("You dont have permission", 401);
+    }
+    await creditCard.destroy();
+    res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
