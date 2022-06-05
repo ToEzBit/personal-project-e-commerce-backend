@@ -26,3 +26,22 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMe = async (req, res, next) => {
+  try {
+    const { id } = req.admin;
+    const admin = await Admin.findOne({
+      where: { id },
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    });
+
+    if (!admin) {
+      creatError("Admin not found", 404);
+    }
+    res.json({ admin });
+  } catch (err) {
+    next(err);
+  }
+};
