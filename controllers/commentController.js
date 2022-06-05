@@ -20,3 +20,22 @@ exports.createComment = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const { commentId } = req.params;
+    const comment = await ProductComment.findOne({ where: { id: commentId } });
+
+    if (!comment) {
+      creatError("Comment not found", 400);
+    }
+    if (id !== comment.userId) {
+      creatError("You have no permission", 400);
+    }
+    await comment.destroy();
+    res.status(204).json({});
+  } catch (err) {
+    next(err);
+  }
+};
