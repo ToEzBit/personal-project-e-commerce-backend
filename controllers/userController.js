@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const { User, Address, PhoneNumber, CreditCard } = require("../models");
-const creatError = require("../utils/creatError");
+const createError = require("../utils/createError");
 const validateUpdateProfile = require("../utils/validateUpdateProfile");
 const cropImage = require("../utils/cropImage");
 const cloundinary = require("../utils/cloudinary");
@@ -34,7 +34,7 @@ exports.updateProfile = async (req, res, next) => {
     );
 
     if (validated) {
-      creatError(validated.message, validated.statusCode);
+      createError(validated.message, validated.statusCode);
     }
 
     const user = await User.findOne({ where: { id } });
@@ -94,7 +94,7 @@ exports.uploadProfileImage = async (req, res, next) => {
     } = req;
 
     if (!req.file) {
-      creatError("No file uploaded", 400);
+      createError("No file uploaded", 400);
     }
 
     const uploadedImage = await cloundinary.upload(req.file.path, {
@@ -152,7 +152,7 @@ exports.deleteCreditCard = async (req, res, next) => {
     });
 
     if (!creditCard) {
-      creatError("Credit card not found", 404);
+      createError("Credit card not found", 404);
     }
 
     if (id !== creditCard.userId) {

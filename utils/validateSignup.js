@@ -1,5 +1,5 @@
 const validator = require("validator");
-const creatError = require("./creatError");
+const createError = require("./createError");
 const { User } = require("../models");
 
 module.exports = async (email, userName, password, confirmPassword) => {

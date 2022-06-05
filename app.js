@@ -10,6 +10,7 @@ const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 const productRoute = require("./routes/productRoute");
 const commentRoute = require("./routes/commentRoute");
+const orderRoute = require("./routes/orderRoute");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/users", passportJwtMiddleware, userRoute);
 app.use("/admins", adminRoute);
 app.use("/products", productRoute);
 app.use("/comments/", passportJwtMiddleware, commentRoute);
+app.use("/orders", passportJwtMiddleware, orderRoute);
 
 app.use(errorMiddleware);
 app.use(notfoundMiddleware);

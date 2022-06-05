@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const validateSignup = require("../utils/validateSignup");
-const creatError = require("../utils/creatError");
+const createError = require("../utils/createError");
 const { User } = require("../models");
 
 const genToken = (payload) => {
@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
     );
 
     if (validated) {
-      creatError(validated.message, validated.statusCode);
+      createError(validated.message, validated.statusCode);
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -48,13 +48,13 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
-      creatError("User not found", 404);
+      createError("User not found", 404);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      creatError("Password is incorrect", 401);
+      createError("Password is incorrect", 401);
     }
 
     const token = genToken({ id: user.id });

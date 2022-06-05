@@ -1,5 +1,5 @@
 const fs = require("fs");
-const creatError = require("../utils/creatError");
+const createError = require("../utils/createError");
 const { User, Product, ProductImage, ProductComment } = require("../models");
 const { Op } = require("sequelize");
 const cloundinary = require("../utils/cloudinary");
@@ -27,13 +27,13 @@ exports.createProduct = async (req, res, next) => {
       !status ||
       !mainDescription
     ) {
-      creatError("Missing fields", 400);
+      createError("Missing fields", 400);
     }
 
     const product = await Product.findOne({ where: { productName } });
 
     if (product) {
-      creatError("Product already exists", 400);
+      createError("Product already exists", 400);
     }
 
     // const productName = "gundam wing";
@@ -130,7 +130,7 @@ exports.updateProduct = async (req, res, next) => {
     const product = await Product.findOne({ where: { id: productId } });
 
     if (!product) {
-      creatError("Product not found", 404);
+      createError("Product not found", 404);
     }
 
     product.productName = productName || product.productName;
@@ -204,7 +204,7 @@ exports.deleteProduct = async (req, res, next) => {
     const product = await Product.findOne({ where: { id: productId } });
 
     if (!product) {
-      creatError("Product not found", 404);
+      createError("Product not found", 404);
     }
 
     const productImg = await ProductImage.findAll({ where: { productId } });

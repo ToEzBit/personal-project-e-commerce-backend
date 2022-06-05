@@ -1,5 +1,5 @@
 const { Product, ProductComment } = require("../models");
-const creatError = require("../utils/creatError");
+const createError = require("../utils/createError");
 exports.createComment = async (req, res, next) => {
   try {
     const { id } = req.user;
@@ -7,7 +7,7 @@ exports.createComment = async (req, res, next) => {
     const { productId } = req.params;
     const product = await Product.findOne({ where: { id: productId } });
     if (!product) {
-      creatError("Product not found", 400);
+      createError("Product not found", 400);
     }
     const createdComment = await ProductComment.create({
       userId: id,
@@ -28,10 +28,10 @@ exports.deleteComment = async (req, res, next) => {
     const comment = await ProductComment.findOne({ where: { id: commentId } });
 
     if (!comment) {
-      creatError("Comment not found", 400);
+      createError("Comment not found", 400);
     }
     if (id !== comment.userId) {
-      creatError("You have no permission", 400);
+      createError("You have no permission", 400);
     }
     await comment.destroy();
     res.status(204).json({});
