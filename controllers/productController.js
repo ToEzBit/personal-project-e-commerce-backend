@@ -195,3 +195,35 @@ exports.updateProduct = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findOne({ where: { id: productId } });
+
+    if (!product) {
+      creatError("Product not found", 404);
+    }
+
+    const productImg = await ProductImage.findAll({ where: { productId } });
+
+    productImg.map(async (el) => {
+      await cloundinary.destroy(el.publicId);
+    });
+
+    const destroyImgId = [];
+    productImg.map(async (el) => {
+      destroyImgId.push(el.id);
+    });
+
+    destroyImgId.map(async (el) => {
+      await ProductImage.destroy({ where: { id: el } });
+    });
+
+    await product.destroy();
+    res.status(204).json({});
+  } catch (err) {
+    next(err);
+  }
+};
