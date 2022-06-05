@@ -144,50 +144,51 @@ exports.updateProduct = async (req, res, next) => {
     product.subDescription1 = subDescription1 || product.subDescription1;
     product.subDescription2 = subDescription2 || product.subDescription2;
 
-    if (req.files.standardImg) {
-      const { standardImg } = req.files;
-      standardImg.map(async (el) => {
-        const uploadStandardImage = await cloundinary.upload(el.path, {
+    if (req.files) {
+      if (req.files.standardImg) {
+        const { standardImg } = req.files;
+        standardImg.map(async (el) => {
+          const uploadStandardImage = await cloundinary.upload(el.path, {
+            folder: `codecamp-e-commerce/product/${product.productName}`,
+          });
+          const addImage = await ProductImage.create({
+            productId: product.id,
+            role: "standard",
+            image: uploadStandardImage.secure_url,
+            publicId: uploadStandardImage.public_id,
+          });
+          await fs.unlinkSync(el.path);
+        });
+      }
+      if (req.files.highlightImg) {
+        const { highlightImg } = req.files;
+        highlightImg.map(async (el) => {
+          const uploadHighlightImg = await cloundinary.upload(el.path, {
+            folder: `codecamp-e-commerce/product/${product.productName}`,
+          });
+          const addImage = await ProductImage.create({
+            productId: product.id,
+            role: "highlight",
+            image: uploadHighlightImg.secure_url,
+            publicId: uploadHighlightImg.public_id,
+          });
+          await fs.unlinkSync(el.path);
+        });
+      }
+
+      if (req.files.thumbnail) {
+        const { thumbnail } = req.files;
+        const uploadThumbnail = await cloundinary.upload(thumbnail[0].path, {
           folder: `codecamp-e-commerce/product/${product.productName}`,
         });
-        const addImage = await ProductImage.create({
+        const addThumbnail = await ProductImage.create({
           productId: product.id,
-          role: "standard",
-          image: uploadStandardImage.secure_url,
-          publicId: uploadStandardImage.public_id,
+          role: "thumbnail",
+          image: uploadThumbnail.secure_url,
+          publicId: uploadThumbnail.public_id,
         });
-        await fs.unlinkSync(el.path);
-      });
-    }
-
-    if (req.files.highlightImg) {
-      const { highlightImg } = req.files;
-      highlightImg.map(async (el) => {
-        const uploadHighlightImg = await cloundinary.upload(el.path, {
-          folder: `codecamp-e-commerce/product/${product.productName}`,
-        });
-        const addImage = await ProductImage.create({
-          productId: product.id,
-          role: "highlight",
-          image: uploadHighlightImg.secure_url,
-          publicId: uploadHighlightImg.public_id,
-        });
-        await fs.unlinkSync(el.path);
-      });
-    }
-
-    if (req.files.thumbnail) {
-      const { thumbnail } = req.files;
-      const uploadThumbnail = await cloundinary.upload(thumbnail[0].path, {
-        folder: `codecamp-e-commerce/product/${product.productName}`,
-      });
-      const addThumbnail = await ProductImage.create({
-        productId: product.id,
-        role: "thumbnail",
-        image: uploadThumbnail.secure_url,
-        publicId: uploadThumbnail.public_id,
-      });
-      await fs.unlinkSync(thumbnail[0].path);
+        await fs.unlinkSync(thumbnail[0].path);
+      }
     }
 
     await product.save();
