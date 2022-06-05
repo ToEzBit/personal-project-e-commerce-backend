@@ -164,3 +164,39 @@ exports.deleteCreditCard = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMe = async (req, res, next) => {
+  try {
+    const {
+      user: { id },
+    } = req;
+
+    const user = await User.findOne({
+      where: { id },
+      attributes: {
+        exclude: ["password", "lastUpdatePassword", "createdAt", "updatedAt"],
+      },
+      include: [
+        {
+          model: Address,
+          attributes: {
+            exclude: ["userId", "createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: PhoneNumber,
+          attributes: {
+            exclude: ["userId", "createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: CreditCard,
+          attributes: {
+            exclude: ["userId", "createdAt", "updatedAt"],
+          },
+        },
+      ],
+    });
+    res.json({ user });
+  } catch (err) {}
+};

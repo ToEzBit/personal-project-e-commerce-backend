@@ -12,4 +12,6 @@ router.post(
 router.delete("/address", userController.deleteAddress);
 router.delete("/creditCard", userController.deleteCreditCard);
 
+router.get("/me", userController.getMe);
+
 module.exports = router;
