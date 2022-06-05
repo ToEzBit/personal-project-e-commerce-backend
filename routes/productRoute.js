@@ -24,4 +24,5 @@ router.patch(
 );
 
 router.delete("/:productId", productController.deleteProduct);
+router.delete("/image/:imageId", productController.deleteImage);
 module.exports = router;

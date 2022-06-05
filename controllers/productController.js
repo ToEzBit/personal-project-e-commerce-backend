@@ -227,3 +227,19 @@ exports.deleteProduct = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteImage = async (req, res, next) => {
+  try {
+    const { imageId } = req.params;
+    const image = await ProductImage.findOne({ where: { id: imageId } });
+    if (!image) {
+      creatError("Image not found", 404);
+    }
+
+    await cloundinary.destroy(image.publicId);
+    await image.destroy();
+    res.status(204).json({});
+  } catch (err) {
+    next(err);
+  }
+};
