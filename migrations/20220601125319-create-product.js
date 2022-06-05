@@ -36,7 +36,11 @@ module.exports = {
         type: Sequelize.STRING(500),
       },
       subDescription2: {
-        type: Sequelize.STRING(255),
+        type: Sequelize.STRING(500),
+      },
+      status: {
+        type: Sequelize.ENUM(["active", "inactive"]),
+        defaultValue: "active",
       },
       createdAt: {
         allowNull: false,

@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       role: {
-        type: DataTypes.ENUM(["standard", "highlight"]),
+        type: DataTypes.ENUM(["standard", "highlight", "thumbnail"]),
         defaultValue: "standard",
       },
     },

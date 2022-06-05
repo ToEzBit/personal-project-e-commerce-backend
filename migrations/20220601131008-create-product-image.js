@@ -27,7 +27,7 @@ module.exports = {
         allowNull: false,
       },
       role: {
-        type: Sequelize.ENUM(["standard", "highlight"]),
+        type: Sequelize.ENUM(["standard", "highlight", "thumbnail"]),
         defaultValue: "standard",
       },
       createdAt: {

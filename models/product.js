@@ -60,11 +60,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       mainDescription: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(500),
         allowNull: false,
       },
-      subDescription1: DataTypes.STRING(255),
-      subDescription2: DataTypes.STRING(255),
+      subDescription1: DataTypes.STRING(500),
+      subDescription2: DataTypes.STRING(500),
+      status: {
+        type: DataTypes.ENUM(["active", "inactive"]),
+        defaultValue: "active",
+      },
     },
     {
       sequelize,
