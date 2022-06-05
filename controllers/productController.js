@@ -1,6 +1,6 @@
 const fs = require("fs");
 const creatError = require("../utils/creatError");
-const { Product, ProductImage, ProductComment } = require("../models");
+const { User, Product, ProductImage, ProductComment } = require("../models");
 const cloundinary = require("../utils/cloudinary");
 exports.createProduct = async (req, res, next) => {
   try {
@@ -274,6 +274,35 @@ exports.getProducts = async (req, res, next) => {
       ],
     });
     res.json({ products });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getProductById = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findOne({
+      where: { id: productId },
+      attributes: {
+        exclude: ["createdAt"],
+      },
+      include: [
+        { model: ProductImage },
+        {
+          model: ProductComment,
+          attributes: { exclude: ["updatedAt"] },
+          include: [
+            { model: User, attributes: ["id", "userName", "profileImage"] },
+          ],
+        },
+      ],
+    });
+
+    res.json({ product });
+    if (!product) {
+      creatError("Product not found", 404);
+    }
   } catch (err) {
     next(err);
   }
