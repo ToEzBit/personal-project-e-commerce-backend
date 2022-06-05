@@ -39,8 +39,8 @@ exports.updateProfile = async (req, res, next) => {
 
     const user = await User.findOne({ where: { id } });
 
-    user.firstName = firstName;
-    user.lastName = lastName;
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
     user.save();
 
     if (newPassword) {
