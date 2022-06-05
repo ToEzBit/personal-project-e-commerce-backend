@@ -29,5 +29,6 @@ router.patch(
 router.delete("/:productId", productController.deleteProduct);
 router.delete("/image/:imageId", productController.deleteImage);
 router.get("/", productController.getProducts);
+router.get("/search", productController.searchProduct);
 router.get("/:productId", productController.getProductById);
 module.exports = router;

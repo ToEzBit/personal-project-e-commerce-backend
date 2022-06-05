@@ -1,6 +1,7 @@
 const fs = require("fs");
 const creatError = require("../utils/creatError");
 const { User, Product, ProductImage, ProductComment } = require("../models");
+const { Op } = require("sequelize");
 const cloundinary = require("../utils/cloudinary");
 exports.createProduct = async (req, res, next) => {
   try {
@@ -303,6 +304,36 @@ exports.getProductById = async (req, res, next) => {
     if (!product) {
       creatError("Product not found", 404);
     }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.searchProduct = async (req, res, next) => {
+  try {
+    const { search } = req.query;
+    const products = await Product.findAll({
+      where: { productName: { [Op.like]: `%${search}%` } },
+      attributes: {
+        exclude: [
+          "stock",
+          "mainDescription",
+          "subDescription1",
+          "subDescription1",
+          "subDescription1",
+          "createdAt",
+        ],
+      },
+      include: [
+        {
+          model: ProductImage,
+          where: { role: "thumbnail" },
+          attributes: ["image"],
+        },
+      ],
+    });
+
+    res.json({ products });
   } catch (err) {
     next(err);
   }
