@@ -110,3 +110,54 @@ exports.getOrders = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getOrdersQuery = async (req, res, next) => {
+  try {
+    const { mode } = req.query;
+
+    if (!mode) {
+      createError("Mode is required", 400);
+    }
+
+    const orders = await Order.findAll({
+      where: { status: mode },
+      attributes: [
+        "id",
+        "status",
+        "totalPrice",
+        "slip",
+        "trackingNumber",
+        "createdAt",
+      ],
+      include: [
+        {
+          model: Address,
+          attributes: ["province", "district", "postalCode", "description"],
+        },
+        {
+          model: User,
+          attributes: ["id", "email", "username", "firstName", "lastName"],
+          include: [
+            {
+              model: PhoneNumber,
+              attributes: ["phoneNumber"],
+            },
+          ],
+        },
+        {
+          model: OrderProduct,
+          attributes: ["amount", "price"],
+          include: [
+            {
+              model: Product,
+              attributes: ["id", "productName", "role", "category"],
+            },
+          ],
+        },
+      ],
+    });
+    res.json({ orders });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -8,5 +8,6 @@ router.post("/login", adminController.login);
 router.get("/", isAdminMiddleware, adminController.getMe);
 router.get("/users", isAdminMiddleware, adminController.getUsers);
 router.get("/orders", isAdminMiddleware, adminController.getOrders);
+router.get("/orders/query/", isAdminMiddleware, adminController.getOrdersQuery);
 
 module.exports = router;
