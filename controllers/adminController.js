@@ -161,3 +161,29 @@ exports.getOrdersQuery = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updateTracking = async (req, res, next) => {
+  try {
+    const { orderId, trackingNumber } = req.body;
+
+    if (!orderId || !trackingNumber) {
+      createError("Id and trackingNumber are required", 400);
+    }
+
+    const order = await Order.findOne({ where: { id: orderId } });
+
+    if (!order) {
+      createError("Order not found", 404);
+    }
+
+    if (order.status !== "payment") {
+      createError("Order is not payment", 400);
+    }
+
+    order.trackingNumber = trackingNumber;
+    await order.save();
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
