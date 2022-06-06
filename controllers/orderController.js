@@ -78,3 +78,29 @@ exports.deleteOrderProduct = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({ where: { id: orderId } });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+
+    const orderProducts = await OrderProduct.findAll({
+      where: { orderId: order.id },
+    });
+    const orderProductId = [];
+    orderProducts.map((el) => {
+      orderProductId.push(el.id);
+    });
+
+    orderProductId.map(async (el) => {
+      await OrderProduct.destroy({ where: { id: el } });
+    });
+    await order.destroy();
+    res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
