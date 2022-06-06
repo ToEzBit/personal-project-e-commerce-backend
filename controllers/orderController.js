@@ -55,3 +55,26 @@ exports.addOrderProduct = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteOrderProduct = async (req, res, next) => {
+  try {
+    const { orderProductId } = req.params;
+
+    const orderProduct = await OrderProduct.findOne({
+      where: { id: orderProductId },
+    });
+    if (!orderProduct) {
+      createError("OrderProduct not found", 400);
+    }
+    const order = await Order.findOne({ where: { id: orderProduct.orderId } });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+    order.totalPrice -= orderProduct.price * orderProduct.amount;
+    await order.save();
+    await orderProduct.destroy();
+    res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
