@@ -10,5 +10,10 @@ router.get("/users", isAdminMiddleware, adminController.getUsers);
 router.get("/orders", isAdminMiddleware, adminController.getOrders);
 router.get("/orders/query/", isAdminMiddleware, adminController.getOrdersQuery);
 router.patch("/tracking", isAdminMiddleware, adminController.updateTracking);
+router.delete(
+  "/orders/:orderId",
+  isAdminMiddleware,
+  adminController.deleteOrder
+);
 
 module.exports = router;

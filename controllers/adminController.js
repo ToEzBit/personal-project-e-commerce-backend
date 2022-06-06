@@ -187,3 +187,56 @@ exports.updateTracking = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+
+    if (!orderId) {
+      createError("Id is required", 400);
+    }
+
+    const order = await Order.findOne({
+      where: { id: orderId },
+      include: {
+        model: OrderProduct,
+      },
+    });
+
+    if (!order) {
+      createError("Order not found", 404);
+    }
+
+    if (order.status !== "checkout") {
+      createError("Order is not checkout", 400);
+    }
+
+    const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
+
+    const increasedStockArr = [];
+    console.log(arrOrderProducts);
+    arrOrderProducts.map((el) => {
+      const obj = {};
+      obj.productId = el.productId;
+      obj.amount = el.amount;
+      increasedStockArr.push(obj);
+    });
+
+    increasedStockArr.map(async (el) => {
+      const product = await Product.findOne({
+        where: { id: el.productId },
+      });
+      product.stock += el.amount;
+      await product.save();
+    });
+
+    await OrderProduct.destroy({
+      where: { orderId: orderId },
+    });
+
+    await order.destroy();
+    res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
