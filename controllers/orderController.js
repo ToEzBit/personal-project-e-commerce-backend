@@ -162,3 +162,51 @@ exports.getAllOrders = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: OrderProduct,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "productId", "orderId"],
+          },
+          include: [
+            {
+              model: Product,
+              attributes: {
+                exclude: [
+                  "createdAt",
+                  "updatedAt",
+                  "mainDescription",
+                  "subDescription1",
+                  "subDescription2",
+                  "status",
+                ],
+              },
+              include: {
+                model: ProductImage,
+                where: {
+                  role: "thumbnail",
+                },
+                attributes: {
+                  exclude: ["createdAt", "updatedAt", "publicId", "productId"],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!order) {
+      createError("Order not found", 400);
+    }
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
