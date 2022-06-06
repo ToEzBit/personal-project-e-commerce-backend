@@ -54,6 +54,21 @@ exports.addOrderProduct = async (req, res, next) => {
       createError("Product not found", 400);
     }
 
+    if (order.userId !== req.user.id) {
+      createError("You are not the owner of this order", 400);
+    }
+
+    const existOrderProduct = await OrderProduct.findOne({
+      where: {
+        orderId,
+        productId,
+      },
+    });
+
+    if (existOrderProduct) {
+      createError("This product is already in this order", 400);
+    }
+
     const createdOrderProduct = await OrderProduct.create({
       orderId: order.id,
       productId,
@@ -218,13 +233,53 @@ exports.checkoutOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const order = await Order.findOne({
       where: { id: orderId },
+      include: [
+        {
+          model: OrderProduct,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "orderId"],
+          },
+        },
+      ],
     });
     if (!order) {
       createError("Order not found", 400);
     }
+    if (order.userId !== req.user.id) {
+      createError("You are not the owner of this order", 400);
+    }
     if (order.status === "checkout") {
       createError("Order already checked out", 400);
     }
+
+    const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
+
+    const decreedStockArr = [];
+    arrOrderProducts.map((el) => {
+      const obj = {};
+      obj.productId = el.productId;
+      obj.amount = el.amount;
+      decreedStockArr.push(obj);
+    });
+
+    for (let i = 0; i < decreedStockArr.length; i++) {
+      const product = await Product.findOne({
+        where: { id: decreedStockArr[i].productId },
+      });
+      if (product.stock < decreedStockArr[i].amount) {
+        createError("Not enough stock", 400);
+      }
+    }
+
+    decreedStockArr.map(async (el) => {
+      const product = await Product.findOne({ where: { id: el.productId } });
+      if (product.stock < el.amount) {
+        createError(`${product.productName} Not enough stock `, 400);
+      }
+      product.stock -= el.amount;
+      await product.save();
+    });
+
     order.status = "checkout";
     await order.save();
     res.json({ order });
