@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { Admin } = require("../models");
 const createError = require("../utils/createError");
+const { User } = require("../models");
 
 const genToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_ADMIN_SECRET_KEY, {});
@@ -41,6 +42,19 @@ exports.getMe = async (req, res, next) => {
       createError("Admin not found", 404);
     }
     res.json({ admin });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll({
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    });
+    res.json({ users });
   } catch (err) {
     next(err);
   }
