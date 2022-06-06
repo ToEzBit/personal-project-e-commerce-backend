@@ -1,4 +1,4 @@
-const { Product, Order, OrderProduct } = require("../models");
+const { Product, ProductImage, Order, OrderProduct } = require("../models");
 const createError = require("../utils/createError");
 exports.createOrder = async (req, res, next) => {
   try {
@@ -100,6 +100,52 @@ exports.deleteOrder = async (req, res, next) => {
     });
     await order.destroy();
     res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllOrders = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const orders = await Order.findAll({
+      where: {
+        userId: id,
+      },
+      include: [
+        {
+          model: OrderProduct,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "productId", "orderId"],
+          },
+          include: [
+            {
+              model: Product,
+              attributes: {
+                exclude: [
+                  "createdAt",
+                  "updatedAt",
+                  "mainDescription",
+                  "subDescription1",
+                  "subDescription2",
+                  "status",
+                ],
+              },
+              include: {
+                model: ProductImage,
+                where: {
+                  role: "thumbnail",
+                },
+                attributes: {
+                  exclude: ["createdAt", "updatedAt", "publicId", "productId"],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+    res.json({ orders });
   } catch (err) {
     next(err);
   }
