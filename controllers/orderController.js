@@ -210,3 +210,23 @@ exports.getOrderById = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.checkoutOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({
+      where: { id: orderId },
+    });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+    if (order.status === "checkout") {
+      createError("Order already checked out", 400);
+    }
+    order.status = "checkout";
+    await order.save();
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
