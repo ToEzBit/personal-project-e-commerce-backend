@@ -19,8 +19,16 @@ module.exports = {
         },
       },
       status: {
-        type: Sequelize.ENUM(["pending", "processing", "shipped", "cancelled"]),
-        defaultValue: "pending",
+        type: Sequelize.ENUM([
+          "neworder",
+          "checkout",
+          "payment",
+          "pending",
+          "delivered",
+          "succeed",
+          "canceled",
+        ]),
+        defaultValue: "neworder",
         allowNull: false,
       },
       totalPrice: {
