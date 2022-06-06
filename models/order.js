@@ -17,6 +17,15 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "RESTRICT",
       });
 
+      Order.belongsTo(models.Address, {
+        foreignKey: {
+          name: "addressId",
+          allowNull: false,
+        },
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+      });
+
       Order.hasMany(models.OrderProduct, {
         foreignKey: {
           name: "orderId",

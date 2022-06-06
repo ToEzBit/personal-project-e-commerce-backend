@@ -16,6 +16,15 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "RESTRICT",
         onUpdate: "RESTRICT",
       });
+
+      Address.hasMany(models.Order, {
+        foreignKey: {
+          name: "addressId",
+          allowNull: false,
+        },
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+      });
     }
   }
   Address.init(

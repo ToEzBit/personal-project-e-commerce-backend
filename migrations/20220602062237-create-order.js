@@ -18,6 +18,16 @@ module.exports = {
           key: "id",
         },
       },
+      addressId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: {
+            tableName: "Address",
+          },
+          key: "id",
+        },
+      },
       status: {
         type: Sequelize.ENUM([
           "neworder",

@@ -1,7 +1,14 @@
 const jwt = require("jsonwebtoken");
 const { Admin } = require("../models");
 const createError = require("../utils/createError");
-const { User } = require("../models");
+const {
+  User,
+  Order,
+  OrderProduct,
+  Product,
+  PhoneNumber,
+  Address,
+} = require("../models");
 
 const genToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_ADMIN_SECRET_KEY, {});
@@ -55,6 +62,50 @@ exports.getUsers = async (req, res, next) => {
       },
     });
     res.json({ users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.findAll({
+      attributes: [
+        "id",
+        "status",
+        "totalPrice",
+        "slip",
+        "trackingNumber",
+        "createdAt",
+      ],
+      include: [
+        {
+          model: Address,
+          attributes: ["province", "district", "postalCode", "description"],
+        },
+        {
+          model: User,
+          attributes: ["id", "email", "username", "firstName", "lastName"],
+          include: [
+            {
+              model: PhoneNumber,
+              attributes: ["phoneNumber"],
+            },
+          ],
+        },
+        {
+          model: OrderProduct,
+          attributes: ["amount", "price"],
+          include: [
+            {
+              model: Product,
+              attributes: ["id", "productName", "role", "category"],
+            },
+          ],
+        },
+      ],
+    });
+    res.json({ orders });
   } catch (err) {
     next(err);
   }
