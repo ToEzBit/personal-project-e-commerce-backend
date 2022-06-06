@@ -1,5 +1,7 @@
+const fs = require("fs");
 const { Product, ProductImage, Order, OrderProduct } = require("../models");
 const createError = require("../utils/createError");
+const cloundinary = require("../utils/cloudinary");
 exports.createOrder = async (req, res, next) => {
   try {
     const { id } = req.user;
@@ -228,5 +230,40 @@ exports.checkoutOrder = async (req, res, next) => {
     res.json({ order });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.paymentOrder = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      createError("slip is require", 400);
+    }
+    const { orderId } = req.params;
+    const order = await Order.findOne({
+      where: { id: orderId },
+    });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+    if (order.status !== "checkout") {
+      createError("Order not checkout yet", 400);
+    }
+    if (order.userId !== req.user.id) {
+      createError("You are not the owner of this order", 400);
+    }
+
+    const uploadedImage = await cloundinary.upload(req.file.path, {
+      folder: "codecamp-e-commerce/payment-slip",
+    });
+
+    order.slip = uploadedImage.secure_url;
+    order.slipPublicId = uploadedImage.public_id;
+    order.status = "payment";
+    await order.save();
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  } finally {
+    fs.unlinkSync(req.file.path);
   }
 };
