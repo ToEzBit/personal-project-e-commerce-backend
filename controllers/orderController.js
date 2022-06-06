@@ -9,6 +9,18 @@ exports.createOrder = async (req, res, next) => {
     if (!product) {
       createError("Product not found", 400);
     }
+
+    const existOrder = await Order.findOne({
+      where: {
+        userId: id,
+        status: "neworder",
+      },
+    });
+
+    if (existOrder) {
+      createError("You have an order in progress", 400);
+    }
+
     const order = await Order.create({ userId: id, status: "neworder" });
     const orderProduct = await OrderProduct.create({
       orderId: order.id,
