@@ -50,13 +50,14 @@ exports.updateProfile = async (req, res, next) => {
     }
 
     if (address) {
-      const { province, district, postalCode, description } = address;
+      const { province, district, postalCode, description, name } = address;
       const createdAddress = await Address.create({
         userId: id,
         province,
         district,
         postalCode,
         description,
+        name,
       });
       res.json({ address: createdAddress });
       return;

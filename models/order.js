@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       Order.belongsTo(models.Address, {
         foreignKey: {
           name: "addressId",
-          allowNull: false,
         },
         onDelete: "RESTRICT",
         onUpdate: "RESTRICT",

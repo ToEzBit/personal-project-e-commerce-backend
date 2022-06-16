@@ -1,7 +1,15 @@
 const fs = require("fs");
-const { Product, ProductImage, Order, OrderProduct } = require("../models");
+const {
+  Product,
+  ProductImage,
+  Order,
+  OrderProduct,
+  Address,
+} = require("../models");
 const createError = require("../utils/createError");
 const cloundinary = require("../utils/cloudinary");
+const { Op } = require("sequelize");
+
 exports.createOrder = async (req, res, next) => {
   try {
     const { id } = req.user;
@@ -22,8 +30,10 @@ exports.createOrder = async (req, res, next) => {
     if (existOrder) {
       createError("You have an order in progress", 400);
     }
-
-    const order = await Order.create({ userId: id, status: "neworder" });
+    const order = await Order.create({
+      userId: id,
+      status: "neworder",
+    });
     const orderProduct = await OrderProduct.create({
       orderId: order.id,
       productId,
@@ -140,6 +150,13 @@ exports.getAllOrders = async (req, res, next) => {
     const orders = await Order.findAll({
       where: {
         userId: id,
+        [Op.or]: [
+          { status: "payment" },
+          { status: "pending" },
+          { status: "delivered" },
+          { status: "succeed" },
+          { status: "cancelled" },
+        ],
       },
       include: [
         {
@@ -228,9 +245,94 @@ exports.getOrderById = async (req, res, next) => {
   }
 };
 
+exports.getAllOrdersByStatus = async (req, res, next) => {
+  try {
+    const { status } = req.query;
+    const { id } = req.user;
+    const orders = await Order.findAll({
+      where: {
+        userId: id,
+        status: status,
+      },
+      include: [
+        {
+          model: OrderProduct,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "productId", "orderId"],
+          },
+          include: [
+            {
+              model: Product,
+              attributes: {
+                exclude: [
+                  "createdAt",
+                  "updatedAt",
+                  "mainDescription",
+                  "subDescription1",
+                  "subDescription2",
+                  "status",
+                ],
+              },
+              include: {
+                model: ProductImage,
+                where: {
+                  role: "thumbnail",
+                },
+                attributes: {
+                  exclude: ["createdAt", "updatedAt", "publicId", "productId"],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+    res.json({ orders });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateOrderProduct = async (req, res, next) => {
+  try {
+    const { orderProductId } = req.params;
+    const { action } = req.query;
+    const orderProduct = await OrderProduct.findOne({
+      where: { id: orderProductId },
+    });
+    if (!orderProduct) {
+      createError("OrderProduct not found", 400);
+    }
+    if (!action) {
+      createError("Action is require", 400);
+    }
+    const order = await Order.findOne({
+      where: { id: orderProduct.orderId },
+    });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+
+    if (action === "increase") {
+      orderProduct.amount++;
+      order.totalPrice += orderProduct.price;
+    }
+    if (action === "decrease") {
+      orderProduct.amount--;
+      order.totalPrice -= orderProduct.price;
+    }
+    await orderProduct.save();
+    await order.save();
+    res.json({ order, orderProduct });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.checkoutOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    const { addressId } = req.body;
     const order = await Order.findOne({
       where: { id: orderId },
       include: [
@@ -250,6 +352,14 @@ exports.checkoutOrder = async (req, res, next) => {
     }
     if (order.status === "checkout") {
       createError("Order already checked out", 400);
+    }
+
+    const address = await Address.findOne({
+      where: { id: addressId },
+    });
+
+    if (!address) {
+      createError("Address not found", 400);
     }
 
     const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
@@ -281,6 +391,7 @@ exports.checkoutOrder = async (req, res, next) => {
     });
 
     order.status = "checkout";
+    order.addressId = addressId;
     await order.save();
     res.json({ order });
   } catch (err) {

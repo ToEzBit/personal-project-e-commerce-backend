@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       Address.hasMany(models.Order, {
         foreignKey: {
           name: "addressId",
-          allowNull: false,
         },
         onDelete: "RESTRICT",
         onUpdate: "RESTRICT",
@@ -43,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       description: {
         type: DataTypes.STRING,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {

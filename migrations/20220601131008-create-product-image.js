@@ -19,7 +19,7 @@ module.exports = {
         },
       },
       image: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(500),
         allowNull: false,
       },
       publicId: {

@@ -20,7 +20,6 @@ module.exports = {
       },
       addressId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
         references: {
           model: {
             tableName: "Address",

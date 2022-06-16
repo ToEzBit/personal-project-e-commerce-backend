@@ -6,6 +6,7 @@ const {
   Order,
   OrderProduct,
   Product,
+  ProductImage,
   PhoneNumber,
   Address,
 } = require("../models");
@@ -100,6 +101,15 @@ exports.getOrders = async (req, res, next) => {
             {
               model: Product,
               attributes: ["id", "productName", "role", "category"],
+              include: {
+                model: ProductImage,
+                where: {
+                  role: "thumbnail",
+                },
+                attributes: {
+                  exclude: ["createdAt", "updatedAt", "publicId", "productId"],
+                },
+              },
             },
           ],
         },

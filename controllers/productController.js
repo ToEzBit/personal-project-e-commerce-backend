@@ -62,7 +62,7 @@ exports.createProduct = async (req, res, next) => {
       const { standardImg } = req.files;
       standardImg.map(async (el) => {
         const uploadStandardImage = await cloundinary.upload(el.path, {
-          folder: `codecamp-e-commerce/product/${productName}`,
+          folder: `codecamp-e-commerce/product/${newProduct.id}`,
         });
         const addImage = await ProductImage.create({
           productId: newProduct.id,
@@ -78,7 +78,7 @@ exports.createProduct = async (req, res, next) => {
       const { highlightImg } = req.files;
       highlightImg.map(async (el) => {
         const uploadHighlightImg = await cloundinary.upload(el.path, {
-          folder: `codecamp-e-commerce/product/${productName}`,
+          folder: `codecamp-e-commerce/product/${newProduct.id}`,
         });
         const addImage = await ProductImage.create({
           productId: newProduct.id,
@@ -93,7 +93,7 @@ exports.createProduct = async (req, res, next) => {
     if (req.files.thumbnail) {
       const { thumbnail } = req.files;
       const uploadThumbnail = await cloundinary.upload(thumbnail[0].path, {
-        folder: `codecamp-e-commerce/product/${productName}`,
+        folder: `codecamp-e-commerce/product/${newProduct.id}`,
       });
       const addThumbnail = await ProductImage.create({
         productId: newProduct.id,
@@ -149,7 +149,7 @@ exports.updateProduct = async (req, res, next) => {
         const { standardImg } = req.files;
         standardImg.map(async (el) => {
           const uploadStandardImage = await cloundinary.upload(el.path, {
-            folder: `codecamp-e-commerce/product/${product.productName}`,
+            folder: `codecamp-e-commerce/product/${product.id}`,
           });
           const addImage = await ProductImage.create({
             productId: product.id,
@@ -164,7 +164,7 @@ exports.updateProduct = async (req, res, next) => {
         const { highlightImg } = req.files;
         highlightImg.map(async (el) => {
           const uploadHighlightImg = await cloundinary.upload(el.path, {
-            folder: `codecamp-e-commerce/product/${product.productName}`,
+            folder: `codecamp-e-commerce/product/${product.id}`,
           });
           const addImage = await ProductImage.create({
             productId: product.id,
@@ -179,7 +179,7 @@ exports.updateProduct = async (req, res, next) => {
       if (req.files.thumbnail) {
         const { thumbnail } = req.files;
         const uploadThumbnail = await cloundinary.upload(thumbnail[0].path, {
-          folder: `codecamp-e-commerce/product/${product.productName}`,
+          folder: `codecamp-e-commerce/product/${product.id}`,
         });
         const addThumbnail = await ProductImage.create({
           productId: product.id,
