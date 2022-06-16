@@ -172,6 +172,32 @@ exports.getOrdersQuery = async (req, res, next) => {
   }
 };
 
+exports.confirmPayment = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      createError("orderId is required", 400);
+    }
+
+    const order = await Order.findOne({ where: { id: orderId } });
+
+    if (!order) {
+      createError("Order not found", 404);
+    }
+
+    if (order.status !== "payment") {
+      createError("Order is not payment", 400);
+    }
+
+    order.status = "pending";
+    await order.save();
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.updateTracking = async (req, res, next) => {
   try {
     const { orderId, trackingNumber } = req.body;
@@ -186,11 +212,12 @@ exports.updateTracking = async (req, res, next) => {
       createError("Order not found", 404);
     }
 
-    if (order.status !== "payment") {
-      createError("Order is not payment", 400);
+    if (order.status !== "pending") {
+      createError("Order is not confirm", 400);
     }
 
     order.trackingNumber = trackingNumber;
+    order.status = "delivered";
     await order.save();
     res.json({ order });
   } catch (err) {
