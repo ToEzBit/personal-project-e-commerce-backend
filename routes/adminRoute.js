@@ -15,10 +15,10 @@ router.patch(
   adminController.confirmPayment
 );
 router.patch("/tracking", isAdminMiddleware, adminController.updateTracking);
-router.delete(
-  "/orders/:orderId",
+router.patch(
+  "/cancel-order/:orderId",
   isAdminMiddleware,
-  adminController.deleteOrder
+  adminController.cancelOrder
 );
 
 module.exports = router;

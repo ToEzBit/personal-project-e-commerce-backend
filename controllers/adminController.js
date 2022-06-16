@@ -225,7 +225,7 @@ exports.updateTracking = async (req, res, next) => {
   }
 };
 
-exports.deleteOrder = async (req, res, next) => {
+exports.cancelOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
 
@@ -244,14 +244,13 @@ exports.deleteOrder = async (req, res, next) => {
       createError("Order not found", 404);
     }
 
-    if (order.status !== "checkout") {
-      createError("Order is not checkout", 400);
+    if (order.status === "succeed" || order.status === "canceled") {
+      createError("Order can not cancel", 400);
     }
 
     const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
 
     const increasedStockArr = [];
-    console.log(arrOrderProducts);
     arrOrderProducts.map((el) => {
       const obj = {};
       obj.productId = el.productId;
@@ -267,12 +266,14 @@ exports.deleteOrder = async (req, res, next) => {
       await product.save();
     });
 
-    await OrderProduct.destroy({
-      where: { orderId: orderId },
-    });
+    // await OrderProduct.destroy({
+    //   where: { orderId: orderId },
+    // });
 
-    await order.destroy();
-    res.status(204).json();
+    // await order.destroy()
+    order.status = "canceled";
+    await order.save();
+    res.json({ order });
   } catch (err) {
     next(err);
   }

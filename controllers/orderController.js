@@ -155,7 +155,7 @@ exports.getAllOrders = async (req, res, next) => {
           { status: "pending" },
           { status: "delivered" },
           { status: "succeed" },
-          { status: "cancelled" },
+          { status: "canceled" },
         ],
       },
       include: [
