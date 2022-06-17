@@ -1,6 +1,12 @@
 const fs = require("fs");
 const createError = require("../utils/createError");
-const { User, Product, ProductImage, ProductComment } = require("../models");
+const {
+  User,
+  Product,
+  ProductImage,
+  ProductComment,
+  sequelize,
+} = require("../models");
 const { Op } = require("sequelize");
 const cloundinary = require("../utils/cloudinary");
 
@@ -13,7 +19,9 @@ const cloundinary = require("../utils/cloudinary");
 // const mainDescription = "test upload product + image";
 // const subDescription1 = null;
 // const subDescription2 = null;
+
 exports.createProduct = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const {
       productName,
@@ -45,17 +53,20 @@ exports.createProduct = async (req, res, next) => {
       createError("Product already exists", 400);
     }
 
-    const newProduct = await Product.create({
-      productName,
-      stock,
-      price,
-      role,
-      category,
-      status,
-      mainDescription,
-      subDescription1,
-      subDescription2,
-    });
+    const newProduct = await Product.create(
+      {
+        productName,
+        stock,
+        price,
+        role,
+        category,
+        status,
+        mainDescription,
+        subDescription1,
+        subDescription2,
+      },
+      { transaction: t }
+    );
 
     if (req.files.standardImg) {
       const { standardImg } = req.files;
@@ -63,12 +74,15 @@ exports.createProduct = async (req, res, next) => {
         const uploadStandardImage = await cloundinary.upload(el.path, {
           folder: `codecamp-e-commerce/product/${newProduct.id}`,
         });
-        const addImage = await ProductImage.create({
-          productId: newProduct.id,
-          role: "standard",
-          image: uploadStandardImage.secure_url,
-          publicId: uploadStandardImage.public_id,
-        });
+        const addImage = await ProductImage.create(
+          {
+            productId: newProduct.id,
+            role: "standard",
+            image: uploadStandardImage.secure_url,
+            publicId: uploadStandardImage.public_id,
+          },
+          { transaction: t }
+        );
       });
     }
 
@@ -78,12 +92,15 @@ exports.createProduct = async (req, res, next) => {
         const uploadHighlightImg = await cloundinary.upload(el.path, {
           folder: `codecamp-e-commerce/product/${newProduct.id}`,
         });
-        const addImage = await ProductImage.create({
-          productId: newProduct.id,
-          role: "highlight",
-          image: uploadHighlightImg.secure_url,
-          publicId: uploadHighlightImg.public_id,
-        });
+        const addImage = await ProductImage.create(
+          {
+            productId: newProduct.id,
+            role: "highlight",
+            image: uploadHighlightImg.secure_url,
+            publicId: uploadHighlightImg.public_id,
+          },
+          { transaction: t }
+        );
       });
     }
 
@@ -92,16 +109,20 @@ exports.createProduct = async (req, res, next) => {
       const uploadThumbnail = await cloundinary.upload(thumbnail[0].path, {
         folder: `codecamp-e-commerce/product/${newProduct.id}`,
       });
-      const addThumbnail = await ProductImage.create({
-        productId: newProduct.id,
-        role: "thumbnail",
-        image: uploadThumbnail.secure_url,
-        publicId: uploadThumbnail.public_id,
-      });
+      const addThumbnail = await ProductImage.create(
+        {
+          productId: newProduct.id,
+          role: "thumbnail",
+          image: uploadThumbnail.secure_url,
+          publicId: uploadThumbnail.public_id,
+        },
+        { transaction: t }
+      );
     }
-
+    await t.commit();
     res.json({ newProduct });
   } catch (err) {
+    await t.rollback();
     next(err);
   } finally {
     if (req.files.highlightImg) {

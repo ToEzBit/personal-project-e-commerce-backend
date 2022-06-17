@@ -5,12 +5,14 @@ const {
   Order,
   OrderProduct,
   Address,
+  sequelize,
 } = require("../models");
 const createError = require("../utils/createError");
 const cloundinary = require("../utils/cloudinary");
 const { Op } = require("sequelize");
 
 exports.createOrder = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const { id } = req.user;
     const { productId, amount } = req.body;
@@ -30,21 +32,29 @@ exports.createOrder = async (req, res, next) => {
     if (existOrder) {
       createError("You have an order in progress", 400);
     }
-    const order = await Order.create({
-      userId: id,
-      status: "neworder",
-    });
-    const orderProduct = await OrderProduct.create({
-      orderId: order.id,
-      productId,
-      amount,
-      price: product.price,
-    });
+    const order = await Order.create(
+      {
+        userId: id,
+        status: "neworder",
+      },
+      { transaction: t }
+    );
+    const orderProduct = await OrderProduct.create(
+      {
+        orderId: order.id,
+        productId,
+        amount,
+        price: product.price,
+      },
+      { transaction: t }
+    );
 
     order.totalPrice = product.price * amount;
     order.save();
+    await t.commit();
     res.json({ order, orderProduct });
   } catch (err) {
+    await t.rollback();
     next(err);
   }
 };
