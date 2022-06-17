@@ -26,8 +26,16 @@ router.patch(
   productController.updateProduct
 );
 
-router.delete("/:productId", productController.deleteProduct);
-router.delete("/image/:imageId", productController.deleteImage);
+router.delete(
+  "/:productId",
+  isAdminMiddleware,
+  productController.deleteProduct
+);
+router.delete(
+  "/image/:imageId",
+  isAdminMiddleware,
+  productController.deleteImage
+);
 router.get("/", productController.getProducts);
 router.get("/search", productController.searchProduct);
 router.get("/:productId", productController.getProductById);

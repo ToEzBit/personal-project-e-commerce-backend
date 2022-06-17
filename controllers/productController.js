@@ -3,6 +3,16 @@ const createError = require("../utils/createError");
 const { User, Product, ProductImage, ProductComment } = require("../models");
 const { Op } = require("sequelize");
 const cloundinary = require("../utils/cloudinary");
+
+// const productName = "gundam wing";
+// const stock = 10;
+// const price = 100;
+// const role = "standard";
+// const category = "mega";
+// const status = "inactive";
+// const mainDescription = "test upload product + image";
+// const subDescription1 = null;
+// const subDescription2 = null;
 exports.createProduct = async (req, res, next) => {
   try {
     const {
@@ -11,7 +21,6 @@ exports.createProduct = async (req, res, next) => {
       price,
       role,
       category,
-      description,
       status,
       mainDescription,
       subDescription1,
@@ -35,16 +44,6 @@ exports.createProduct = async (req, res, next) => {
     if (product) {
       createError("Product already exists", 400);
     }
-
-    // const productName = "gundam wing";
-    // const stock = 10;
-    // const price = 100;
-    // const role = "standard";
-    // const category = "mega";
-    // const status = "inactive";
-    // const mainDescription = "test upload product + image";
-    // const subDescription1 = null;
-    // const subDescription2 = null;
 
     const newProduct = await Product.create({
       productName,
@@ -70,7 +69,6 @@ exports.createProduct = async (req, res, next) => {
           image: uploadStandardImage.secure_url,
           publicId: uploadStandardImage.public_id,
         });
-        await fs.unlinkSync(el.path);
       });
     }
 
@@ -86,7 +84,6 @@ exports.createProduct = async (req, res, next) => {
           image: uploadHighlightImg.secure_url,
           publicId: uploadHighlightImg.public_id,
         });
-        await fs.unlinkSync(el.path);
       });
     }
 
@@ -101,12 +98,25 @@ exports.createProduct = async (req, res, next) => {
         image: uploadThumbnail.secure_url,
         publicId: uploadThumbnail.public_id,
       });
-      await fs.unlinkSync(thumbnail[0].path);
     }
 
     res.json({ newProduct });
   } catch (err) {
     next(err);
+  } finally {
+    if (req.files.highlightImg) {
+      req.files.highlightImg.map((el) => {
+        fs.unlinkSync(el.path);
+      });
+    }
+    if (req.files.standardImg) {
+      req.files.standardImg.map((el) => {
+        fs.unlinkSync(el.path);
+      });
+    }
+    if (req.files.thumbnail) {
+      fs.unlinkSync(req.files.thumbnail[0].path);
+    }
   }
 };
 
@@ -259,7 +269,6 @@ exports.getProducts = async (req, res, next) => {
     const products = await Product.findAll({
       attributes: {
         exclude: [
-          "stock",
           "mainDescription",
           "subDescription1",
           "subDescription1",
