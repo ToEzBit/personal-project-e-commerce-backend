@@ -128,11 +128,11 @@ exports.deleteAddress = async (req, res, next) => {
     const address = await Address.findOne({ where: { id: addressId } });
 
     if (!address) {
-      creatError("Address not found", 404);
+      createError("Address not found", 404);
     }
 
     if (id !== address.userId) {
-      creatError("You dont have permission", 401);
+      createError("You dont have permission", 401);
     }
 
     await address.destroy();
@@ -157,7 +157,7 @@ exports.deleteCreditCard = async (req, res, next) => {
     }
 
     if (id !== creditCard.userId) {
-      creatError("You dont have permission", 401);
+      createError("You dont have permission", 401);
     }
     await creditCard.destroy();
     res.status(204).json();
