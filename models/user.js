@@ -85,6 +85,10 @@ module.exports = (sequelize, DataTypes) => {
       profileImagePublicId: {
         type: DataTypes.STRING,
       },
+      point: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
     },
     {
       sequelize,

@@ -60,6 +60,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      discount: {
+        type: Sequelize.INTEGER,
+      },
     });
   },
   async down(queryInterface, Sequelize) {

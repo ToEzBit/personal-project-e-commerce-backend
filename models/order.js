@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
       slip: DataTypes.STRING,
       slipPublicId: DataTypes.STRING,
       trackingNumber: DataTypes.STRING,
+      discount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
     },
     {
       sequelize,

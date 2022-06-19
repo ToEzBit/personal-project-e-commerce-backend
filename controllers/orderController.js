@@ -5,6 +5,7 @@ const {
   Order,
   OrderProduct,
   Address,
+  User,
   sequelize,
 } = require("../models");
 const createError = require("../utils/createError");
@@ -403,6 +404,88 @@ exports.checkoutOrder = async (req, res, next) => {
     order.status = "checkout";
     order.addressId = addressId;
     await order.save();
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.checkoutOrderWithDiscount = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { addressId } = req.body;
+
+    const { id } = req.user;
+    const order = await Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: OrderProduct,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "orderId"],
+          },
+        },
+      ],
+    });
+    if (!order) {
+      createError("Order not found", 400);
+    }
+    if (order.userId !== req.user.id) {
+      createError("You are not the owner of this order", 400);
+    }
+    if (order.status === "checkout") {
+      createError("Order already checked out", 400);
+    }
+
+    const address = await Address.findOne({
+      where: { id: addressId },
+    });
+
+    if (!address) {
+      createError("Address not found", 400);
+    }
+
+    const user = await User.findOne({ where: { id: id } });
+    if (!user) {
+      createError("User not found", 400);
+    }
+
+    const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
+
+    const decreedStockArr = [];
+    arrOrderProducts.map((el) => {
+      const obj = {};
+      obj.productId = el.productId;
+      obj.amount = el.amount;
+      decreedStockArr.push(obj);
+    });
+
+    for (let i = 0; i < decreedStockArr.length; i++) {
+      const product = await Product.findOne({
+        where: { id: decreedStockArr[i].productId },
+      });
+      if (product.stock < decreedStockArr[i].amount) {
+        createError("Not enough stock", 400);
+      }
+    }
+
+    decreedStockArr.map(async (el) => {
+      const product = await Product.findOne({ where: { id: el.productId } });
+      if (product.stock < el.amount) {
+        createError(`${product.productName} Not enough stock `, 400);
+      }
+      product.stock -= el.amount;
+      await product.save();
+    });
+
+    order.status = "checkout";
+    order.totalPrice -= user.point;
+    order.discount = user.point;
+    order.addressId = addressId;
+    await order.save();
+
+    user.point = 0;
+    await user.save();
     res.json({ order });
   } catch (err) {
     next(err);

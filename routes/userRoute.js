@@ -4,6 +4,7 @@ const userController = require("../controllers/userController");
 const upload = require("../middlewares/upload");
 
 router.patch("/updateProfile", userController.updateProfile);
+router.patch("/point", userController.updatePoint);
 router.post(
   "/uploadProfileImage",
   upload.single("profileImage"),

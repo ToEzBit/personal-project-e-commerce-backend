@@ -88,6 +88,21 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
+exports.updatePoint = async (req, res, next) => {
+  try {
+    const { point } = req.body;
+    const { id } = req.user;
+    const user = await User.findOne({ where: { id } });
+    if (!user) {
+      createError("User not found", 404);
+    }
+    user.point = user.point + point;
+    await user.save();
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.uploadProfileImage = async (req, res, next) => {
   try {
     const {

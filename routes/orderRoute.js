@@ -16,6 +16,10 @@ router.patch(
 );
 router.patch("/checkout/:orderId", orderController.checkoutOrder);
 router.patch(
+  "/checkout/discount/:orderId",
+  orderController.checkoutOrderWithDiscount
+);
+router.patch(
   "/payment/:orderId",
   upload.single("slip"),
   orderController.paymentOrder

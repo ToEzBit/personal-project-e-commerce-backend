@@ -77,6 +77,7 @@ exports.getOrders = async (req, res, next) => {
         "totalPrice",
         "slip",
         "trackingNumber",
+        "discount",
         "createdAt",
       ],
       include: [
@@ -248,6 +249,14 @@ exports.cancelOrder = async (req, res, next) => {
       createError("Order can not cancel", 400);
     }
 
+    const user = await User.findOne({
+      where: { id: order.userId },
+    });
+
+    if (!user) {
+      createError("User not found", 404);
+    }
+
     const arrOrderProducts = JSON.parse(JSON.stringify(order.OrderProducts));
 
     const increasedStockArr = [];
@@ -273,6 +282,11 @@ exports.cancelOrder = async (req, res, next) => {
     // await order.destroy()
     order.status = "canceled";
     await order.save();
+
+    if (order.discount > 0) {
+      user.point += order.discount;
+    }
+    await user.save();
     res.json({ order });
   } catch (err) {
     next(err);
