@@ -307,6 +307,61 @@ exports.getProducts = async (req, res, next) => {
   }
 };
 
+exports.getActiveProducts = async (req, res, next) => {
+  try {
+    const products = await Product.findAll({
+      where: { status: "active" },
+      attributes: {
+        exclude: [
+          "mainDescription",
+          "subDescription1",
+          "subDescription1",
+          "subDescription1",
+          "createdAt",
+        ],
+      },
+      include: [
+        {
+          model: ProductImage,
+          where: { role: "thumbnail" },
+          attributes: ["image"],
+        },
+      ],
+    });
+    res.json({ products });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getActiveProductById = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findOne({
+      where: { id: productId, status: "active" },
+      attributes: {
+        exclude: ["createdAt"],
+      },
+      include: [
+        { model: ProductImage },
+        {
+          model: ProductComment,
+          attributes: { exclude: ["updatedAt"] },
+          include: [
+            { model: User, attributes: ["id", "userName", "profileImage"] },
+          ],
+        },
+      ],
+    });
+    if (!product) {
+      createError("Product not found", 404);
+    }
+    res.json({ product });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getProductById = async (req, res, next) => {
   try {
     const { productId } = req.params;
@@ -335,14 +390,14 @@ exports.getProductById = async (req, res, next) => {
   }
 };
 
-exports.searchProduct = async (req, res, next) => {
+exports.searchActiveProduct = async (req, res, next) => {
   try {
-    const { search } = req.query;
+    const { category } = req.params;
+
     const products = await Product.findAll({
-      where: { productName: { [Op.like]: `%${search}%` } },
+      where: { status: "active", category: category },
       attributes: {
         exclude: [
-          "stock",
           "mainDescription",
           "subDescription1",
           "subDescription1",
@@ -358,7 +413,6 @@ exports.searchProduct = async (req, res, next) => {
         },
       ],
     });
-
     res.json({ products });
   } catch (err) {
     next(err);

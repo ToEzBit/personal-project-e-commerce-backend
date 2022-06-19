@@ -37,6 +37,8 @@ router.delete(
   productController.deleteImage
 );
 router.get("/", productController.getProducts);
-router.get("/search", productController.searchProduct);
+router.get("/active", productController.getActiveProducts);
 router.get("/:productId", productController.getProductById);
+router.get("/active/:productId", productController.getActiveProductById);
+router.get("/search/:category", productController.searchActiveProduct);
 module.exports = router;
